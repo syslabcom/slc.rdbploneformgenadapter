@@ -1,0 +1,17 @@
+*.svn
+eggs
+*.egg-info
+.installed.cfg
+Imaging-1.1.6.tar.gz
+Imaging-1.1.6/
+bin/
+develop-eggs/
+downloads/
+include/
+lib/
+parts/
+var/
+*.pyc
+*.swp
+coverage/
+report/

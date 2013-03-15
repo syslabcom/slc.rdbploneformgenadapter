@@ -1,0 +1,28 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    i18n_domain="slc.rdbploneformgenadapter">
+
+    <browser:page
+        for="zope.app.container.interfaces.IAdding"
+        name="slc.rdbploneformgenadapter.RDBPloneFormGenAdapter"
+        class=".views.AddForm"
+        permission="slc.rdbploneformgenadapter.AddAdapter"
+        />
+
+    <browser:page
+        for="..interfaces.IRDBPloneFormGenAdapterContent"
+        name="edit"
+        class=".views.EditForm"
+        permission="cmf.ModifyPortalContent"
+        />
+
+    <browser:page
+        for="..interfaces.IRDBPloneFormGenAdapterContent"
+        name="view"
+        class=".views.ViewForm"
+        permission="zope2.View"
+        />
+
+</configure>
+

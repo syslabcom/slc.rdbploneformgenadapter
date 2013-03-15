@@ -1,0 +1,18 @@
+<configure xmlns="http://namespaces.zope.org/zope"
+ xmlns:five="http://namespaces.zope.org/five"
+ xmlns:i18n="http://namespaces.zope.org/i18n"
+ i18n_domain="borg">
+    
+    <five:registerClass
+        class=".content.RDBPloneFormGenAdapterContent"
+        meta_type="RDBPloneFormGenAdapterContent"
+        permission="slc.rdbploneformgenadapter.AddAdapter"
+        addview="slc.rdbploneformgenadapter.RDBPloneFormGenAdapter"
+        />
+
+    <utility
+        component=".content.RDBPloneFormGenAdapterFactory"
+        name="slc.rdbploneformgenadapter.RDBPloneFormGenAdapter"
+        />
+
+</configure>

@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<import-steps>
+    <import-step id="slc.rdbploneformgenadapter-install-dependencies"
+        version="20090908"
+        handler="slr.rdbploneformgenadapter.setuphandlers.installDependencies"
+        title="SLC RDBPloneFormGenAdapter Product dependencies">
+          installDependencies
+    </import-step>
+</import-steps>

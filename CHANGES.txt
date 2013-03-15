@@ -1,0 +1,15 @@
+Changes
+=======
+
+0.0.2 (2009-10-12)
+------------------
+
+- Brown bag bad documentation release (gerken)
+
+
+0.0.1 (2009-10-12)
+------------------
+
+- Initial Release
+
+

@@ -1,0 +1,3 @@
+
+- In the RDB Action Adapter View, check for the existence of the IDatabase 
+  utility, and emit a warning if its missing
