@@ -1,15 +1,19 @@
+from Products.CMFCore.utils import getToolByName
 from xml.dom.minidom import parse
-import log
+
+import logging
 import os
 import transaction
 
 log = logging.getLogger('slc.rdbploneformgenadapter.setuphandlers.py')
+mdfile = os.path.join(
+    os.path.dirname(__file__), 'profiles', 'default', 'metadata.xml')
 
-mdfile = os.path.join(os.path.dirname(__file__), 'profiles', 'default', 
-                      'metadata.xml')
 
 def isNotSelf(self):
     return self.readDataFile('slc.rdbploneformgenadapter_marker.txt') is None
+
+
 def installDependencies(self):
     if isNotSelf(self):
         pass
@@ -22,7 +26,7 @@ def installDependencies(self):
                            .getElementsByTagName('dependency')
     qi = getToolByName(site, 'portal_quickinstaller')
     for dependency in dependencies:
-        profile = dpenedency.childNodes[0].data
+        profile = dependency.childNodes[0].data
         product = str(profile.split('-')[1].split(':')[0])
         if not qi.isProductInstalled(product):
             log.info("Installing dependency: %s" % product)

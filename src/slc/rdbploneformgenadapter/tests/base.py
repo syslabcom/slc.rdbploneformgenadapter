@@ -15,19 +15,20 @@ SiteLayer = layer.PloneSite
 # Let Zope know about the two products we require above-and-beyond a basic
 # Plone install (PloneTestCase takes care of these).
 
-
-# Import PloneTestCase - this registers more products with Zope as a side effect
+# Import PloneTestCase - this registers more products with Zope as
+# a side effect
 from Products.PloneTestCase.PloneTestCase import PloneTestCase
 from Products.PloneTestCase.PloneTestCase import FunctionalTestCase
 from Products.PloneTestCase.PloneTestCase import setupPloneSite
 
+
 # Set up a Plone site, and apply the membrane and borg extension profiles
 # to make sure they are installed.
-
-def startZServer(browser = None):
+def startZServer(browser=None):
     ip, port = ZopeTestCase.utils.startZServer()
     if browser:
         return browser.url.replace('nohost', '%s:%i' % (ip, port))
+
 
 def viewPage(browser):
     file('/tmp/bla.html', 'w').write(browser.contents)
@@ -37,6 +38,7 @@ def viewPage(browser):
         webbrowser.open('/tmp/bla.html')
         os._exit(0)
 
+
 def viewError(browser):
     browser.getLink('see the full error message').click()
     file('/tmp/bla.html', 'w').write(browser.contents)
@@ -45,6 +47,7 @@ def viewError(browser):
     if not os.fork():
         webbrowser.open('/tmp/bla.html')
         os._exit(0)
+
 
 class SlcRDBPloneFormGenLayer(SiteLayer):
     @classmethod
@@ -61,7 +64,7 @@ class SlcRDBPloneFormGenLayer(SiteLayer):
 
         setupPloneSite(
             extension_profiles=(
-                'slc.rdbploneformgenadapter:default', 
+                'slc.rdbploneformgenadapter:default',
             ), products=(
             ))
 
@@ -82,6 +85,7 @@ class SlcRDBPloneFormGenLayer(SiteLayer):
     def testTearDown(cls):
         pass
 
+
 class RDBPloneFormGenAdapterTestCase(PloneTestCase):
     """Base class for integration tests for the 'borg' product. This may
     provide specific set-up and tear-down operations, or provide convenience
@@ -98,12 +102,14 @@ class RDBPloneFormGenAdapterTestCase(PloneTestCase):
     def afterTearDown(self):
         self.folder.manage_delObjects(['ff'])
 
+
 class RDBPloneFormGenAdapterFunctionalTestCase(FunctionalTestCase):
-    """Base class for functional integration tests for the 'borg' product. 
-    This may provide specific set-up and tear-down operations, or provide 
+    """Base class for functional integration tests for the 'borg' product.
+    This may provide specific set-up and tear-down operations, or provide
     convenience methods.
     """
     layer = SlcRDBPloneFormGenLayer
+
     def afterSetUp(self):
         self.folder.invokeFactory('FormFolder', 'ff')
         self.ff = self.folder.ff
@@ -112,4 +118,3 @@ class RDBPloneFormGenAdapterFunctionalTestCase(FunctionalTestCase):
 
     def afterTearDown(self):
         self.folder.manage_delObjects(['ff'])
-

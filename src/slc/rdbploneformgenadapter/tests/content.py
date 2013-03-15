@@ -1,8 +1,10 @@
 from base import RDBPloneFormGenAdapterTestCase
 
+
 class TestContent(RDBPloneFormGenAdapterTestCase):
-    def test_bla():
+    def test_bla(self):
         self.assertTrue(False)
+
 
 def test_suite():
     from unittest import TestSuite, makeSuite

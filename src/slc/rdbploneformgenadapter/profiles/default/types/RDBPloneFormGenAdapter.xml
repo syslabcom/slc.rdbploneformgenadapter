@@ -2,7 +2,6 @@
 <object name="RDBPloneFormGenAdapter"
         meta_type="Factory-based Type Information"
         xmlns:i18n="http://xml.zope.org/namespaces/i18n">
-
  <property name="title">RDBPloneFormGenAdapter</property>
  <property name="description">The configuration object needed to add the Save to database action to PloneFormGen form</property>
  <property name="content_meta_type">RDBPloneFormGenAdapterContent</property>

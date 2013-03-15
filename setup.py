@@ -1,10 +1,15 @@
-from setuptools import setup, find_packages
+from setuptools import setup
 from xml.dom.minidom import parse
-import sys, os
 
-mdfile = os.path.join(os.path.dirname(__file__), 'src', 'slc', 
-                      'rdbploneformgenadapter', 'profiles', 'default', 
-                      'metadata.xml')
+import os
+
+mdfile = os.path.join(
+    os.path.dirname(__file__),
+    'src',
+    'slc',
+    'rdbploneformgenadapter', 'profiles', 'default',
+    'metadata.xml'
+)
 
 metadata = parse(mdfile)
 version = metadata.getElementsByTagName('version')[0].childNodes[0].data
@@ -13,15 +18,15 @@ shortdesc = metadata.getElementsByTagName('description')[0].childNodes[0].data
 setup(name='slc.rdbploneformgenadapter',
       version=version,
       description=shortdesc,
-      long_description=open('README.txt').read() + '\n' + 
+      long_description=open('README.txt').read() + '\n' +
                        "Change history\n"
-                       "**************\n" + 
+                       "**************\n" +
                        open('CHANGES.txt').read() + '\n' +
                        "Future features, mabye\n"
-                       "**********************\n" + 
+                       "**********************\n" +
                        open('TODO.txt').read() + '\n',
 #                       "Contributors.txt\n"
-#                       "****************\n" + 
+#                       "****************\n" +
 #                       open('CONTRIBUTORS.txt').read()
       classifiers=[
         "Framework :: Plone",
@@ -35,8 +40,8 @@ setup(name='slc.rdbploneformgenadapter',
       url='http://products.syslab.com/products.slc.rdbploneformgenadapter',
       license='GPL',
       packages=['slc', 'slc/rdbploneformgenadapter'],
-      package_dir = {'' : 'src'},
-      namespace_packages = ['slc'],
+      package_dir={'': 'src'},
+      namespace_packages=['slc'],
       include_package_data=True,
       zip_safe=False,
       install_requires=[

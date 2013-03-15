@@ -1,10 +1,11 @@
 from collective.lead.interfaces import IDatabase
 from Products.PloneFormGen.config import FORM_ERROR_MARKER
 from Products.PloneFormGen.interfaces import IPloneFormGenActionAdapter
+from slc.rdbploneformgenadapter.interfaces import \
+    IRDBPloneFormGenAdapterContent
 from zope.component import adapts, getUtility, ComponentLookupError
 from zope.interface import implements
 
-from slc.rdbploneformgenadapter.interfaces import IRDBPloneFormGenAdapterContent
 
 class ActionProvider(object):
     implements(IPloneFormGenActionAdapter)
@@ -13,14 +14,16 @@ class ActionProvider(object):
     def __init__(self, context):
         self.context = context
 
-    def onSuccess(self, fields, REQUEST = None):
+    def onSuccess(self, fields, REQUEST=None):
         try:
             db = getUtility(IDatabase, self.context.db_utility_name)
         except ComponentLookupError:
-            return {FORM_ERROR_MARKER : 'Can not write to database, wrong configuration. Please contact site owner.'}
+            return {
+                FORM_ERROR_MARKER: 'Can not write to database, wrong '
+                'configuration. Please contact site owner.'
+            }
 
         execute = db.connection.engine.execute
-        
         query = self.context.query
 
         query_args = {}
