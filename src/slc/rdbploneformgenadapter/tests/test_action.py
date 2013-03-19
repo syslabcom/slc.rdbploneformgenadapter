@@ -1,6 +1,6 @@
 from collective.lead.interfaces import IDatabase
 from Products.PloneFormGen.config import FORM_ERROR_MARKER
-from sqlalchemy.exceptions import ProgrammingError
+from sqlalchemy.exc import ProgrammingError
 from zope.component import provideUtility, getGlobalSiteManager
 from zope.publisher.browser import TestRequest
 

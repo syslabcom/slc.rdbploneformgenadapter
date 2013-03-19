@@ -5,7 +5,7 @@ from Products.PloneFormGen.interfaces import IPloneFormGenActionAdapter
 from slc.rdbploneformgenadapter import SlcMessageFactory as _
 from slc.rdbploneformgenadapter.interfaces import \
     IRDBPloneFormGenAdapterContent
-from sqlalchemy.exceptions import ProgrammingError
+from sqlalchemy.exc import ProgrammingError
 from zope.component import getUtility, ComponentLookupError
 from zope.component.factory import Factory
 from zope.interface import implements
