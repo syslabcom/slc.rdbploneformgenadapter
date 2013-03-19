@@ -1,0 +1,6 @@
+<layers>
+  <layer
+    name="slc.rdbploneformgenadapter.layer"
+    interface="slc.rdbploneformgenadapter.interfaces.IRDBPloneFormGenAdapterLayer"
+  />
+</layers>

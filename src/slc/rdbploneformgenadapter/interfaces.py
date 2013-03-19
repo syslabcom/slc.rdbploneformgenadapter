@@ -1,3 +1,4 @@
+from plone.app.discussion.interfaces import IDiscussionLayer
 from slc.rdbploneformgenadapter import SlcMessageFactory as _
 from zope.interface import Interface
 from zope import schema
@@ -18,3 +19,7 @@ class IRDBPloneFormGenAdapterContent(Interface):
                       'collective.lead.interfaces.IDatabase'),
         required=True
     )
+
+
+class IRDBPloneFormGenAdapterLayer(IDiscussionLayer):
+    """Custom browser layer for this package"""
