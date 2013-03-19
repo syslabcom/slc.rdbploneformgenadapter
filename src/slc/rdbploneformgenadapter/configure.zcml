@@ -1,14 +1,14 @@
 <configure xmlns="http://namespaces.zope.org/zope"
- xmlns:five="http://namespaces.zope.org/five"
- xmlns:cmf="http://namespaces.zope.org/cmf"
- xmlns:i18n="http://namespaces.zope.org/i18n"
- xmlns:genericsetup="http://namespaces.zope.org/genericsetup"
- i18n_domain="slc.rdbploneformgenadapter">
-    
+           xmlns:five="http://namespaces.zope.org/five"
+           xmlns:cmf="http://namespaces.zope.org/cmf"
+           xmlns:i18n="http://namespaces.zope.org/i18n"
+           xmlns:genericsetup="http://namespaces.zope.org/genericsetup"
+           i18n_domain="slc.rdbploneformgenadapter">
+
     <permission
         id="slc.rdbploneformgenadapter.AddAdapter"
         title="SLC: Add RDBPloneFormGenAdapter"
-    />
+       />
 
     <genericsetup:registerProfile
         name="default"
@@ -16,13 +16,12 @@
         directory="profiles/default"
         description="Extension profile for RDBPloneFormGenAdapter"
         provides="Products.GenericSetup.interfaces.EXTENSION"
-    />
+       />
 
     <include package=".content"/>
     <include package=".browser"/>
     <include package="Products.PloneFormGen"/>
 
-<!--    <adapter factory=".adapters.ActionProvider" />  -->
+    <!--adapter factory=".adapters.ActionProvider" /-->
 
 </configure>
-

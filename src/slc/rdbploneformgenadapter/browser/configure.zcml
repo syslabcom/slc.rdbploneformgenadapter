@@ -24,4 +24,23 @@
         permission="zope2.View"
         />
 
+    <!-- XXX: Override plone.app.discussion viewlet with a dummy one to
+         get rid of errors.
+
+         The problem is that RDBPloneFormGenAdapterContent implements
+         IContentish for which the viewlet is registered, but IConversation
+         adaptation fails because RDBPloneFormGenAdapterContent doesn't
+         provide IAnnotatable interface. Perhaps this should be fixed in
+         plone.app.discussion?
+    -->
+    <browser:viewlet
+        name="plone.comments"
+        for="slc.rdbploneformgenadapter.interfaces.IRDBPloneFormGenAdapterContent"
+        layer="slc.rdbploneformgenadapter.interfaces.IRDBPloneFormGenAdapterLayer"
+        manager="plone.app.layout.viewlets.interfaces.IBelowContent"
+        view="plone.app.layout.globals.interfaces.IViewView"
+        class=".viewlets.CommentsViewlet"
+        permission="zope2.View"
+        />
+
 </configure>
