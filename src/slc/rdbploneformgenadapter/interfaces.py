@@ -10,7 +10,7 @@ class IRDBPloneFormGenAdapterContent(Interface):
         title=_(u'Insert query'),
         description=_(u'The query that will be performed to insert all '
                       'data'),
-        required=True
+        required=False
     )
 
     db_utility_name = schema.TextLine(
