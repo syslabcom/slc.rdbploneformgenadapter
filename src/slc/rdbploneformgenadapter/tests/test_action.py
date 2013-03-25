@@ -11,14 +11,28 @@ STMTS = []
 
 
 class DummyEngine(object):
+    def connect(self):
+        return DummyConnection()
+
+
+class DummyTransaction(object):
+    def commit(self):
+        pass
+
+    def rollback(self):
+        pass
+
+
+class DummyConnection(object):
+    engine = DummyEngine()
+
     def execute(self, stmt, **kwargs):
         if stmt == FAIL:
             raise ProgrammingError('Doh', None, None)
         STMTS.append(stmt)
 
-
-class DummyConnection(object):
-    engine = DummyEngine()
+    def begin(self):
+        return DummyTransaction()
 
 
 class DummyDatabase(object):
@@ -27,18 +41,17 @@ class DummyDatabase(object):
 
 class TestContent(RDBPloneFormGenAdapterTestCase):
 
-    def afterSetUp(self):
-        STMTS = []
-        provideUtility(DummyDatabase, IDatabase, 'test.database')
-        super(TestContent, self).afterSetUp()
+    def setUp(self):
+        provideUtility(DummyDatabase, provides=IDatabase, name='test.database')
+        super(TestContent, self).setUp()
 
-    def afterTearDown(self):
-        getGlobalSiteManager().unregisterUtility('test.database')
-        super(TestContent, self).afterTearDown()
+    def tearDown(self):
+        getGlobalSiteManager().unregisterUtility(
+            provided=IDatabase, name='test.database')
+        super(TestContent, self).tearDown()
 
     def test_performAction(self):
         query = u'INSERT INTO NOTHING'
-        self.setRoles(('Manager', ))
         self.ff.invokeFactory('RDBPloneFormGenAdapter', 'action')
         self.ff.addActionAdapter('action')
         self.ff.action.db_utility_name = u'test.database'
@@ -55,7 +68,6 @@ class TestContent(RDBPloneFormGenAdapterTestCase):
 
     def test_permActionMissingAdapter(self):
         query = u'INSERT INTO NOTHING'
-        self.setRoles(('Manager', ))
         self.ff.invokeFactory('RDBPloneFormGenAdapter', 'action')
         self.ff.addActionAdapter('action')
         self.ff.action.db_utility_name = u'invalid'
@@ -66,12 +78,13 @@ class TestContent(RDBPloneFormGenAdapterTestCase):
                       'topic': 'topic',
                       'comments': 'comments'})
         )
-        self.assertEquals('Can not write to database, wrong configuration. '
-            'Please contact site owner.', errors[FORM_ERROR_MARKER])
+        self.assertEquals(
+            'Can not write to database, wrong configuration. '
+            'Please contact site owner.',
+            errors[FORM_ERROR_MARKER]
+        )
 
     def test_performActionWithInvalidStatement(self):
-        # query = u'INSERT INTO NOTHING'
-        self.setRoles(('Manager', ))
         self.ff.invokeFactory('RDBPloneFormGenAdapter', 'action')
         self.ff.addActionAdapter('action')
         self.ff.action.db_utility_name = u'test.database'
@@ -81,8 +94,9 @@ class TestContent(RDBPloneFormGenAdapterTestCase):
                 form={'replyto': 'info@syslab.com',
                       'topic': 'topic',
                       'comments': 'comments'}))
-        self.assertEquals(u"Can not write to database, wrong configuration. "
-            "Please contact site owner.(NoneType) None 'Doh' None",
+        self.assertEquals(
+            u"Can not write to database, wrong configuration. "
+            "Please contact site owner.",
             errors[FORM_ERROR_MARKER]
         )
         self.assertEquals(1, len(STMTS))

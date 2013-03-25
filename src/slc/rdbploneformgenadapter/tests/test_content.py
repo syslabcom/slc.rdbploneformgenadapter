@@ -1,9 +1,9 @@
 from base import RDBPloneFormGenAdapterTestCase
+from plone.app.testing import setRoles
 
 
 class TestContent(RDBPloneFormGenAdapterTestCase):
     def test_contentAdd(self):
-        self.setRoles(('Manager', ))
         self.ff.invokeFactory('RDBPloneFormGenAdapter', 'xxx')
         ob = getattr(self.ff, 'id', None)
         self.assertTrue(ob)

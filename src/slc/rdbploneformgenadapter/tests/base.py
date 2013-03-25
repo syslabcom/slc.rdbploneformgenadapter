@@ -1,120 +1,94 @@
-"""Base class for integration tests, based on ZopeTestCase and PloneTestCase.
+"""Base class for integration tests"""
+from plone.app.testing import applyProfile
+from plone.app.testing import FunctionalTesting
+from plone.app.testing import IntegrationTesting
+from plone.app.testing import login
+from plone.app.testing import PLONE_FIXTURE
+from plone.app.testing import PloneSandboxLayer
+from plone.app.testing import setRoles
+from plone.app.testing import TEST_USER_ID
+from plone.app.testing import TEST_USER_NAME
+from plone.app.testing import TEST_USER_PASSWORD
+from plone.testing import z2
 
-Note that importing this module has various side-effects: it registers a set of
-products with Zope, and it sets up a sandbox Plone site with the appropriate
-products installed.
-"""
-from Testing import ZopeTestCase
-
-from Products.Five import zcml
-from Products.PloneTestCase import layer
-from Products.PloneTestCase.setup import _placefulSetUp, portal_name
-
-SiteLayer = layer.PloneSite
-
-# Let Zope know about the two products we require above-and-beyond a basic
-# Plone install (PloneTestCase takes care of these).
-
-# Import PloneTestCase - this registers more products with Zope as
-# a side effect
-from Products.PloneTestCase.PloneTestCase import PloneTestCase
-from Products.PloneTestCase.PloneTestCase import FunctionalTestCase
-from Products.PloneTestCase.PloneTestCase import setupPloneSite
+import unittest2 as unittest
 
 
-# Set up a Plone site, and apply the membrane and borg extension profiles
-# to make sure they are installed.
-def startZServer(browser=None):
-    ip, port = ZopeTestCase.utils.startZServer()
-    if browser:
-        return browser.url.replace('nohost', '%s:%i' % (ip, port))
+class SlcRDBPloneFormGenLayer(PloneSandboxLayer):
 
+    defaultBases = (PLONE_FIXTURE,)
 
-def viewPage(browser):
-    file('/tmp/bla.html', 'w').write(browser.contents)
-    import webbrowser
-    import os
-    if not os.fork():
-        webbrowser.open('/tmp/bla.html')
-        os._exit(0)
-
-
-def viewError(browser):
-    browser.getLink('see the full error message').click()
-    file('/tmp/bla.html', 'w').write(browser.contents)
-    import webbrowser
-    import os
-    if not os.fork():
-        webbrowser.open('/tmp/bla.html')
-        os._exit(0)
-
-
-class SlcRDBPloneFormGenLayer(SiteLayer):
-    @classmethod
-    def getPortal(cls):
-        app = ZopeTestCase.app()
-        portal = app._getOb(portal_name)
-        _placefulSetUp(portal)
-        return portal
-
-    @classmethod
-    def setUp(cls):
-
-        ZopeTestCase.installProduct('PloneFormGen')
-
-        setupPloneSite(
-            extension_profiles=(
-                'slc.rdbploneformgenadapter:default',
-            ), products=(
-            ))
-
+    def setUpZope(self, app, configurationContext):
+        """Set up Zope."""
+        import plone.app.jquery
         import slc.rdbploneformgenadapter
-        zcml.load_config('configure.zcml', slc.rdbploneformgenadapter)
+        self.loadZCML(package=plone.app.jquery)
+        self.loadZCML(package=slc.rdbploneformgenadapter)
+        z2.installProduct(app, 'Products.PloneFormGen')
 
-        SiteLayer.setUp()
+    def setUpPloneSite(self, portal):
+        """Set up Plone."""
 
-    @classmethod
-    def tearDown(cls):
-        pass
+        # Install into Plone site using portal_setup
+        applyProfile(portal, 'slc.rdbploneformgenadapter:default')
 
-    @classmethod
-    def testSetUp(cls):
-        pass
+        # Login and create a test folder
+        setRoles(portal, TEST_USER_ID, ['Manager'])
+        login(portal, TEST_USER_NAME)
+        portal.invokeFactory('Folder', 'folder')
 
-    @classmethod
-    def testTearDown(cls):
-        pass
+        # Commit so that the test browser sees these objects
+        portal.portal_catalog.clearFindAndRebuild()
+        import transaction
+        transaction.commit()
+
+    def tearDownZope(self, app):
+        """Tear down Zope."""
+        z2.uninstallProduct(app, 'Products.PloneFormGen')
 
 
-class RDBPloneFormGenAdapterTestCase(PloneTestCase):
-    """Base class for integration tests for the 'borg' product. This may
-    provide specific set-up and tear-down operations, or provide convenience
-    methods.
-    """
-    layer = SlcRDBPloneFormGenLayer
+FIXTURE = SlcRDBPloneFormGenLayer()
+INTEGRATION_TESTING = IntegrationTesting(
+    bases=(FIXTURE,), name="SlcRDBPloneFormGenLayer:Integration")
+FUNCTIONAL_TESTING = FunctionalTesting(
+    bases=(FIXTURE,), name="SlcRDBPloneFormGenLayer:Functional")
 
-    def afterSetUp(self):
+
+class RDBPloneFormGenAdapterTestCase(unittest.TestCase):
+    """Base class for integration tests."""
+    layer = INTEGRATION_TESTING
+
+    def setUp(self):
+        self.portal = self.layer['portal']
+        self.folder = self.portal['folder']
         self.folder.invokeFactory('FormFolder', 'ff')
         self.ff = self.folder.ff
         self.ff.manage_delObjects(['mailer'])
         self.ff.toggleActionActive('mailer')
 
-    def afterTearDown(self):
+    def tearDown(self):
         self.folder.manage_delObjects(['ff'])
 
 
-class RDBPloneFormGenAdapterFunctionalTestCase(FunctionalTestCase):
-    """Base class for functional integration tests for the 'borg' product.
-    This may provide specific set-up and tear-down operations, or provide
-    convenience methods.
-    """
-    layer = SlcRDBPloneFormGenLayer
+class RDBPloneFormGenAdapterFunctionalTestCase(unittest.TestCase):
+    """Base class for functional integration tests."""
+    layer = FUNCTIONAL_TESTING
 
-    def afterSetUp(self):
+    def setUp(self):
+        self.portal = self.layer['portal']
+        self.folder = self.portal['folder']
         self.folder.invokeFactory('FormFolder', 'ff')
         self.ff = self.folder.ff
         self.ff.manage_delObjects(['mailer'])
         self.ff.toggleActionActive('mailer')
 
-    def afterTearDown(self):
-        self.folder.manage_delObjects(['ff'])
+    def getBrowser(self, url):
+        """Create an instance of zope.testbrowser."""
+        browser = z2.Browser(self.layer['app'])
+        # self.layer['portal'].absolute_url()
+        browser.open(url + '/login_form')
+        browser.getControl(name='__ac_name').value = TEST_USER_NAME
+        browser.getControl(name='__ac_password').value = TEST_USER_PASSWORD
+        browser.getControl(name='submit').click()
+        self.assertIn('You are now logged in', browser.contents)
+        return browser

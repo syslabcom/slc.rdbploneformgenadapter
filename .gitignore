@@ -16,3 +16,4 @@ var/
 coverage/
 report/
 src/collective.lead
+src/Products.PloneFormGen
