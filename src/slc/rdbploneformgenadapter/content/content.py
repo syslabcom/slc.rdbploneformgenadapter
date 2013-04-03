@@ -5,11 +5,16 @@ from Products.PloneFormGen.interfaces import IPloneFormGenActionAdapter
 from slc.rdbploneformgenadapter import SlcMessageFactory as _
 from slc.rdbploneformgenadapter.interfaces import \
     IRDBPloneFormGenAdapterContent
+from slc.rdbploneformgenadapter.utils import cleanString
 from sqlalchemy.exc import SQLAlchemyError
 from zope.component import getUtility, ComponentLookupError
 from zope.component.factory import Factory
 from zope.interface import implements
 from zope.schema.fieldproperty import FieldProperty
+
+import logging
+
+logger = logging.getLogger('slc.rdbploneformgenadapter.content')
 
 
 class RDBPloneFormGenAdapterContent(Item):
@@ -30,11 +35,7 @@ class RDBPloneFormGenAdapterContent(Item):
         pass
     title = property(_getProperty, _setProperty)
 
-    def _cleanString(self, string):
-        """Changes - to _ and removes dots"""
-        return(string.replace('-', '_').replace('.', ''))
-
-    def _concatenate(attributes, colon=False):
+    def _concatenate(self, attributes, colon=False):
         """Helper function for constructing SQL queries."""
 
         # TODO think about setting column names manually
@@ -62,7 +63,7 @@ class RDBPloneFormGenAdapterContent(Item):
         query_args = query_data[0][1]
 
         for field in fields:
-            field_id = self._cleanString(field.id)
+            field_id = cleanString(field.id)
 
             # handle file fields
             if field.isFileField():
@@ -70,11 +71,9 @@ class RDBPloneFormGenAdapterContent(Item):
                 file_upload = REQUEST.form.get('{0}_file'.format(field_name))
                 file_type = file_upload.filename.split('.')[-1]
                 table_name = form_table_name + '_' + \
-                    self._cleanString(field_name)
+                    cleanString(field_name)
                 query_data.append((
                     table_name,
-                    #XXX: check if it is possible that an object
-                    # has no read() method
                     [{
                         "data": buffer(file_upload.read()),
                         "type": file_type
@@ -91,7 +90,7 @@ class RDBPloneFormGenAdapterContent(Item):
                         item = dict(row)
                         for key, value in item.iteritems():
                             item[key] = item[key].decode('utf8')
-                            item[self._cleanString(key)] = \
+                            item[cleanString(key)] = \
                                 item.pop(key)
                         del item['orderindex_']
                         # check for duplicates
@@ -134,6 +133,7 @@ class RDBPloneFormGenAdapterContent(Item):
         try:
             db = getUtility(IDatabase, self.db_utility_name)
         except ComponentLookupError:
+            logger.exception('Can not write to database, wrong configuration')
             return {
                 FORM_ERROR_MARKER: _(
                     'Can not write to database, wrong configuration. Please '
@@ -141,7 +141,7 @@ class RDBPloneFormGenAdapterContent(Item):
                 )
             }
 
-        form_table_name = self._cleanString(self.getParentNode().id)
+        form_table_name = cleanString(self.getParentNode().id)
         query_args = self._constructQueryData(
             fields, form_table_name, REQUEST)
         query = self.query
@@ -150,6 +150,7 @@ class RDBPloneFormGenAdapterContent(Item):
             connection = db.connection.engine.connect()
             # begin transaction for all executions
             trans = connection.begin()
+
             if(query):
                 # custom query was defined on the adapter, let's use that
                 connection.execute(query, **query_args[0][1])
@@ -188,15 +189,15 @@ class RDBPloneFormGenAdapterContent(Item):
                         connection.execute(query_string, **field[1])
             # commit the transaction, saving the changes
             trans.commit()
-        except SQLAlchemyError, e:
-            trans.rollback()
-            return {
-                FORM_ERROR_MARKER: _(
-                    'Database not configured correctly '
-                    'Please contact site owner.') + str(e)
-            }
         except:
             trans.rollback()
+            logger.exception('Error writing to database.')
+            return {
+                FORM_ERROR_MARKER: _(
+                    'Can not write to database, wrong configuration. Please '
+                    'contact site owner.'
+                )
+            }
 
 
 RDBPloneFormGenAdapterFactory = Factory(
