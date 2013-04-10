@@ -6,7 +6,6 @@ from slc.rdbploneformgenadapter import SlcMessageFactory as _
 from slc.rdbploneformgenadapter.interfaces import \
     IRDBPloneFormGenAdapterContent
 from slc.rdbploneformgenadapter.utils import cleanString
-from sqlalchemy.exc import SQLAlchemyError
 from zope.component import getUtility, ComponentLookupError
 from zope.component.factory import Factory
 from zope.interface import implements
@@ -37,8 +36,6 @@ class RDBPloneFormGenAdapterContent(Item):
 
     def _concatenate(self, attributes, colon=False):
         """Helper function for constructing SQL queries."""
-
-        # TODO think about setting column names manually
         s = '('
         if(colon):
             s += ':'
