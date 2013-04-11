@@ -6,6 +6,7 @@ from slc.rdbploneformgenadapter import SlcMessageFactory as _
 from slc.rdbploneformgenadapter.interfaces import \
     IRDBPloneFormGenAdapterContent
 from slc.rdbploneformgenadapter.utils import cleanString
+from sqlalchemy.exc import SQLAlchemyError
 from zope.component import getUtility, ComponentLookupError
 from zope.component.factory import Factory
 from zope.interface import implements
@@ -34,16 +35,28 @@ class RDBPloneFormGenAdapterContent(Item):
         pass
     title = property(_getProperty, _setProperty)
 
-    def _concatenate(self, attributes, colon=False):
-        """Helper function for constructing SQL queries."""
-        s = '('
-        if(colon):
-            s += ':'
-            tmp = ', :'.join(attributes)
+    def _join_params(self, params, paramstyle=None):
+        """Helper function for constructing SQL queries.
+
+        :param params: a list of parameters to join
+        :param paramstyle: style of parameter formatting. See README.txt and
+            pep-0249 for more information.
+        :returns: a string with joined parameters
+        """
+        params_str = '('
+        if paramstyle:
+            if paramstyle == 'pyformat':  # pyformat, for e.g. postgres
+                params_str += '%('
+                tmp = ')s, %('.join(params) + ')s'
+            elif paramstyle == 'named':  # named, for e.g. sqlite
+                params_str += ':'
+                tmp = ', :'.join(params)
+            else:
+                raise ValueError('Wrong parameter style.')
         else:
-            tmp = ', '.join(attributes)
-        s += tmp + ')'
-        return(s)
+            tmp = ', '.join(params)
+        params_str += tmp + ')'
+        return params_str
 
     def _constructQueryData(self, fields, form_table_name, REQUEST):
         """Parses form fields and prepares data for saving into the database.
@@ -95,6 +108,14 @@ class RDBPloneFormGenAdapterContent(Item):
                             grid_list.append(item)
                 query_data.append((field_name, grid_list))
 
+            # handle date fields
+            # XXX: this is needed for e.g. postgresql, sqlite works fine if we
+            # insert an empty string
+            elif field.portal_type == "FormDateField":
+                date_str = REQUEST.form.get(field.id, '')
+                if date_str:
+                    query_args[field_id] = date_str
+
             # handle all other fields
             else:
                 query_args[field_id] = REQUEST.form.get(
@@ -145,6 +166,16 @@ class RDBPloneFormGenAdapterContent(Item):
 
         try:
             connection = db.connection.engine.connect()
+        except SQLAlchemyError:
+            logger.exception('Error connecting to database.')
+            return {
+                FORM_ERROR_MARKER: _(
+                    'Can not write to database, wrong configuration. Please '
+                    'contact site owner.'
+                )
+            }
+
+        try:
             # begin transaction for all executions
             trans = connection.begin()
 
@@ -157,6 +188,10 @@ class RDBPloneFormGenAdapterContent(Item):
                     form_table_name)
                 form_id = (connection.execute(
                     select_string).scalar() or 0) + 1
+                if db.engine.url.drivername == 'postgresql':
+                    paramstyle = 'pyformat'
+                else:
+                    paramstyle = 'named'
 
                 for field in query_args:
                     table_name = field[0]
@@ -166,22 +201,28 @@ class RDBPloneFormGenAdapterContent(Item):
                         for item in field[1][:]:
                             # Setting grid table name, based on the form name
                             item[form_table_name + "_id"] = form_id
-                            attributes = item.keys()
+                            params = item.keys()
                             query_string = \
                                 "INSERT INTO {0} {1} VALUES {2}".format(
                                     table_name,
-                                    self._concatenate(attributes),
-                                    self._concatenate(attributes, colon=True)
+                                    self._join_params(params),
+                                    self._join_params(
+                                        params,
+                                        paramstyle=paramstyle
+                                    )
                                 )
                             connection.execute(query_string, **item)
                     # insert "normal" fields into the primary table
                     else:
-                        attributes = field[1].keys()
+                        params = field[1].keys()
                         query_string = \
                             "INSERT INTO {0} {1} VALUES {2}".format(
                                 table_name,
-                                self._concatenate(attributes),
-                                self._concatenate(attributes, colon=True)
+                                self._join_params(params),
+                                self._join_params(
+                                    params,
+                                    paramstyle=paramstyle
+                                )
                             )
                         connection.execute(query_string, **field[1])
             # commit the transaction, saving the changes
