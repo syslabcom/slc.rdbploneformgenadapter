@@ -6,7 +6,6 @@ from slc.rdbploneformgenadapter import SlcMessageFactory as _
 from slc.rdbploneformgenadapter.interfaces import \
     IRDBPloneFormGenAdapterContent
 from slc.rdbploneformgenadapter.utils import cleanString
-from sqlalchemy.exc import SQLAlchemyError
 from zope.component import getUtility, ComponentLookupError
 from zope.component.factory import Factory
 from zope.interface import implements
@@ -166,7 +165,7 @@ class RDBPloneFormGenAdapterContent(Item):
 
         try:
             connection = db.connection.engine.connect()
-        except SQLAlchemyError:
+        except:
             logger.exception('Error connecting to database.')
             return {
                 FORM_ERROR_MARKER: _(
