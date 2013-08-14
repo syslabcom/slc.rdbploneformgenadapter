@@ -26,6 +26,8 @@ class RDBPloneFormGenAdapterContent(Item):
     query = FieldProperty(IRDBPloneFormGenAdapterContent['query'])
     db_utility_name = FieldProperty(
         IRDBPloneFormGenAdapterContent['db_utility_name'])
+    exclude_fields = FieldProperty(
+        IRDBPloneFormGenAdapterContent['exclude_fields'])
 
     def _getProperty(self):
         return _("RDB Action Adapter")
@@ -72,6 +74,11 @@ class RDBPloneFormGenAdapterContent(Item):
         query_args = query_data[0][1]
 
         for field in fields:
+
+            # ignore fields that we want to exclude
+            if field.id in self.exclude_fields:
+                continue
+
             field_id = cleanString(field.id)
 
             # handle file fields
