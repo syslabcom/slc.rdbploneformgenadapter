@@ -19,21 +19,23 @@ setup(name='slc.rdbploneformgenadapter',
       version=version,
       description=shortdesc,
       long_description=open('README.txt').read() + '\n' +
-                       "Change history\n"
-                       "**************\n" +
-                       open('CHANGES.txt').read() + '\n' +
-                       "Future features, mabye\n"
-                       "**********************\n" +
-                       open('TODO.txt').read() + '\n',
-#                       "Contributors.txt\n"
-#                       "****************\n" +
-#                       open('CONTRIBUTORS.txt').read()
+      "Change history\n"
+      "**************\n" +
+      open('CHANGES.txt').read() + '\n' +
+      "Future features, mabye\n"
+      "**********************\n" +
+      open('TODO.txt').read() + '\n',
+      #                       "Contributors.txt\n"
+      #                       "****************\n" +
+      #                       open('CONTRIBUTORS.txt').read()
+
+      # Get strings from http://pypi.python.org/pypi?%3Aaction=list_classifiers
       classifiers=[
-        "Framework :: Plone",
-        "Intended Audience :: Developers",
-        "Intended Audience :: End Users/Desktop",
-        "License :: OSI Approved :: GNU General Public License (GPL)",
-      ], # Get strings from http://pypi.python.org/pypi?%3Aaction=list_classifiers
+          "Framework :: Plone",
+          "Intended Audience :: Developers",
+          "Intended Audience :: End Users/Desktop",
+          "License :: OSI Approved :: GNU General Public License (GPL)",
+      ],
       keywords='',
       author='Syslab.com GmbH',
       author_email='info@syslab.com',
@@ -45,15 +47,31 @@ setup(name='slc.rdbploneformgenadapter',
       include_package_data=True,
       zip_safe=False,
       install_requires=[
-        "collective.lead",
-        "Products.PloneFormGen",
-        'setuptools',
-        'Plone',
+          "collective.lead",
+          "Products.PloneFormGen",
+          'setuptools',
+          'Plone',
       ],
-      extras_require=dict(test=[
-        'Products.PloneTestCase',
-        'PIL',
-        ]),
+      extras_require={
+          'test': [
+              'mock',
+              'plone.app.testing',
+              'unittest2',
+          ],
+          'develop': [
+              'jarn.mkrelease',
+              'pep8',
+              'plone.app.debugtoolbar',
+              'plone.reload',
+              'Products.Clouseau',
+              'Products.DocFinderTab',
+              'Products.PDBDebugMode',
+              'Products.PrintingMailHost',
+              'setuptools-flakes',
+              'zest.releaser',
+              'zptlint',
+          ],
+      },
       entry_points="""
       # -*- Entry points: -*-
       """,

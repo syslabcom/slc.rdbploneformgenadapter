@@ -16,10 +16,13 @@ def getBrowser(url):
 
 class BrowserTests(base.RDBPloneFormGenAdapterFunctionalTestCase):
 
-    def afterSetUp(self):
-        super(BrowserTests, self).afterSetUp()
+    def setUp(self):
+        super(BrowserTests, self).setUp()
         self.portal_url = self.portal.absolute_url()
-        self.browser = getBrowser(self.ff.absolute_url())
+        self.browser = self.getBrowser(self.portal.folder.ff.absolute_url())
+
+    def tearDown(self):
+        self.folder.manage_delObjects(['ff'])
 
     def test_addView(self):
         self.assertTrue('RDBPloneFormGenAdapter' in self.browser.contents)

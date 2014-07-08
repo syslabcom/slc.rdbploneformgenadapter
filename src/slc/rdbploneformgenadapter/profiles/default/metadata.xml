@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <metadata>
-    <version>0.0.2</version>
+    <version>0.0.3</version>
     <description>Provides an Action Adapter for PloneFormGen to store data in an RDB</description>
     <dependencies>
         <dependency>profile-Products.PloneFormGen:default</dependency>
