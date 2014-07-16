@@ -1,10 +1,10 @@
 Changes
 =======
 
-0.0.4 (unreleased)
-------------------
+1.0 (unreleased)
+----------------
 
-- Nothing changed yet.
+- Official first release
 
 
 0.0.3 (2013-08-21)
